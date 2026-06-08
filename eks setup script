@@ -1,0 +1,40 @@
+# Update system packages
+sudo apt update && sudo apt upgrade -y
+
+# Install curl & unzip (needed for other installs)
+sudo apt install -y curl unzip wget git
+
+# Install AWS CLI v2
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+rm -rf awscliv2.zip ./aws
+
+# Install kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+
+# Install eksctl
+curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz"
+tar -xzf eksctl_$(uname -s)_amd64.tar.gz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+rm eksctl_$(uname -s)_amd64.tar.gz
+
+# Install Helm
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+chmod +x get_helm.sh
+./get_helm.sh
+rm get_helm.sh
+
+# Install Docker (optional, for testing locally)
+sudo apt install -y docker.io
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Verify all installations
+aws --version
+kubectl version --client
+eksctl version
+helm version
+docker --version
