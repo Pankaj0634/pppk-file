@@ -1,0 +1,338 @@
+sqa_fb4765f68a5f695490eb0b892cda3eb05fbb88b4
+
+
+pipeline {
+    agent any
+    tools {
+        maven 'Maven'
+    }
+    stages {
+        stage('1. Clone Source Code') {
+            steps {
+                git branch: 'master',
+                    url: 'https://github.com/nanineelapu/maven-web-application.git'
+            }
+        }
+        stage('2. SonarQube Code Quality') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh 'mvn clean verify sonar:sonar -Dsonar.projectKey=maven-web-application -DskipTests'
+                }
+            }
+        }
+        stage('3. Quality Gate Check') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        stage('4. Maven Build') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+        stage('5. Ansible Deploy') {
+            steps {
+                sh 'ansible-playbook -i /etc/ansible/hosts /etc/ansible/deploy-maven.yml'
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Pipeline SUCCESS - Maven Web App deployed to Tomcat!'
+        }
+        failure {
+            echo 'Pipeline FAILED - Deployment stopped.'
+        }
+    }
+}
+
+
+
+
+
+sqa_517cb26d9e0bca7da1bc6b9d0b884cb37d9f4b6a
+
+
+sqa_b161c4ee26b6e27ae790be8abc874ff3c02b7066   ecommerce
+
+
+
+sqa_877edfd548fe49497297b3b4f8e933065dbb2a8a    maven
+
+
+
+
+squ_c2b1a19e72ecfd2ab6761d55b017c27860fd3fbd
+
+
+AKIAYS2C2Y2WWBLQLUW3 aaccess 
+
+7NkMxCoxaiuJ5ISarUQNfNXLAB+E2Qs777RWc02r passss
+
+
+b9H9bzM7YFQuOvV5  argo pass
+
+
+
+# Update system packages
+sudo apt update && sudo apt upgrade -y
+
+# Install curl & unzip (needed for other installs)
+sudo apt install -y curl unzip wget git
+
+# Install AWS CLI v2
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+rm -rf awscliv2.zip ./aws
+
+# Install kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+
+# Install eksctl
+curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz"
+tar -xzf eksctl_$(uname -s)_amd64.tar.gz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+rm eksctl_$(uname -s)_amd64.tar.gz
+
+# Install Helm
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+chmod +x get_helm.sh
+./get_helm.sh
+rm get_helm.sh
+
+# Install Docker (optional, for testing locally)
+sudo apt install -y docker.io
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Verify all installations
+aws --version
+kubectl version --client
+eksctl version
+helm version
+docker --version
+
+Nani Reddy
+9:44 PM
+kubectl create namespace retail
+kubectl create namespace argocd
+
+Nani Reddy
+9:48 PM
+kubectl create namespace argo-rollouts
+
+Nani Reddy
+9:49 PM
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+Atharva Valsange
+9:53 PM
+cd hospital-chart
+   33  ls
+   34  curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+   35  helm version
+   36  helm install hospital-app .
+   37  kubectl get pods
+   38  kubectl get svc
+
+Suyash
+10:04 PM
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+Suyash
+10:05 PM
+kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+Suyash
+10:07 PM
+helm install shine-gitops-project .
+
+Atharva Valsange
+10:08 PM
+37  kubectl get pods
+   38  kubectl get svc
+
+Atharva Valsange
+10:13 PM
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+Kubectl create ns retail
+
+curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+rm argocd-linux-amd64
+
+
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+
+
+open another putty using this instnace only and run below cmds
+argocd admin initial-password -n argocd
+
+argocd login localhost:8080 --insecure
+argocd account update-password
+argocd login localhost:8080 --insecure
+kubectl config get-contexts -o name
+argocd cluster add <context-name>
+argocd cluster list
+helm list 
+argocd app create marketplace   --repo https://github.com/AtharvaValsange/K8-s-File.git   --path HELM_CHART   --dest-server https://kubernetes.default.svc   --dest-namespace default
+argocd app sync marketplace
+argocd app list
+
+Nani Reddy
+10:50 PM
+https://kubernetes.default.svc
+
+Nani Reddy
+10:52 PM
+helm install retail-release ./Retail-chart
+
+Nani Reddy
+10:53 PM
+kubectl apply -f Retail-chart/templates/argo-application.yml
+
+Nani Reddy
+11:00 PM
+kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+
+datadog api key de6d37209d7dc029d03b7a7c4cbc8874
+
+datadog login https://us5.datadoghq.com/organization-settings/api-keys
+
+
+
+kubectl apply -f Retail-chart/templates/argo-application.yml
+
+Suyash
+12:34 AM
+https://app.datadoghq.com/organization-settings/api-keys?utm_source=chatgpt.com
+
+Atharva Valsange
+12:40 AM
+helm upgrade datadog-agent datadog/datadog \
+  --set datadog.apiKey=acdbf3310c092ec3db4159b4e82ecff5 \
+  --set datadog.site=us5.datadoghq.com \
+  --set datadog.logs.enabled=true \
+  --set datadog.logs.containerCollectAll=true \
+  --set datadog.apm.enabled=true \
+  --set datadog.processAgent.enabled=true \
+  --namespace default
+kubectl delete pod -l app=datadog-agent
+kubectl get pods -l app=datadog-agent
+
+Suyash
+12:55 AM
+https://chatgpt.com/s/t_6a271723da108191bd2c3ad951d57766
+
+Atharva Valsange
+12:57 AM
+mkdir ai-troubleshooter
+cd ai-troubleshooter
+
+python3 -m venv venv
+source venv/bin/activate
+
+pip install anthropic kubernetes requests
+
+
+
+shine run project command 
+root@ip-172-31-42-184:/home/ubuntu/Shine-GitOps-Projects# history
+    1  aws configure
+    2  eksctl create cluster --name Pankaj-cluster --region ap-south-1 --nodegroup-name Pankaj-nodes --node-type c7i-flex.large --nodes 2 --nodes-min 1 --nodes-max 2 --managed
+    3  git clone https://github.com/Pankaj0634/Shine-GitOps-Projects.git
+    4  ls
+    5  kubectl get nodes
+    6*
+    7  kubectl create namespace argocd
+    8  kubectl get pods -A
+    9  kubectl create namespace argo-rollouts
+   10  kubectl get ns
+   11  ls
+   12  cd Shine-GitOps-Projects
+   13  ls
+   14  cd Retail-chart
+   15  curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+   16  helm install shine-gitops-projects .
+   17  kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+   18  kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+   19  helm install shine-gitops-project .
+   20  kubectl get svc
+   21  kubectl create namespace argocd
+   22  kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+   23  Kubectl create ns retail
+   24  kubectl create namespace argocd
+   25  kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+   26  Kubectl create ns retail
+   27  kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+   28  kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=180s
+   29  kubectl get pods -n argocd
+   30  curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+   31  sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+   32  rm argocd-linux-amd64
+   33  kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+   34  kubectl port-forward svc/argocd-server -n argocd 8080:443
+   35  kubectl get svc -n argocd
+   36  argocd admin initial-password -n argocd
+   37  argocd login localhost:8080 --insecure
+   38  argocd account update-password
+   39  cd ..
+   40  git pull origin main
+   41  kubectl apply -f Retail-chart/templates/argo-application.yml
+   42  kubectl get svc -n argocd
+   43  argocd cluster list
+   44  kubectl get ns
+   45  helm list
+   46  kubectl get pods -n argo-rollouts
+   47  ls
+   48  helm install datadog-agent datadog/datadog     --set datadog.apiKey=<YOUR_DATADOG_API_KEY>     --set datadog.logs.enabled=true     --set datadog.logs.containerCollectAll=true     --set datadog.apm.enabled=true     --set datadog.processAgent.enabled=true     --namespace default
+   49  helm install datadog-agent datadog/datadog     --set datadog.apiKey=de6d37209d7dc029d03b7a7c4cbc8874     --set datadog.logs.enabled=true     --set datadog.logs.containerCollectAll=true     --set datadog.apm.enabled=true     --set datadog.processAgent.enabled=true     --namespace default
+   50  kubectl get pods -l app=datadog-agent
+   51  helm upgrade datadog-agent datadog/datadog   --set datadog.apiKey=de6d37209d7dc029d03b7a7c4cbc8874   --set datadog.site=us5.datadoghq.com   --set datadog.logs.enabled=true   --set datadog.logs.containerCollectAll=true   --set datadog.apm.enabled=true   --set datadog.processAgent.enabled=true   --namespace default
+   52  kubectl delete pod -l app=datadog-agent
+   53  kubectl get pods -l app=datadog-agent
+   54  mkdir ai-troubleshooter
+   55  cd ai-troubleshooter
+   56  python3 -m venv venv
+   57  source venv/bin/activate
+   58  cd ..
+   59  ls
+   60  history
+root@ip-172-31-42-184:/home/ubuntu/Shine-GitOps-Projects#
+
+
+
+
+
+
+Enter namespace/pod (or exit): exit
+root@ip-172-31-42-184:/home/ubuntu/ai-troubleshooter# history
+    1  python3 /home/ubuntu/ai-troubleshooter/agent.py
+    2  export GROQ_API_KEY=""
+    3  python3 /home/ubuntu/ai-troubleshooter/agent.py
+    4  kubectl get pods
+    5  echo $GROQ_API_KEY
+    6  python3 -c "import os; print(os.getenv('GROQ_API_KEY'))"
+    7  ls
+    8  cd  /home/ubuntu/ai-troubleshooter
+    9  ls
+   10  rm agent.py
+   11  ls
+   12  nano agent.py
+   13  chmod +x agent.py
+   14  python3 agent.py
+   15  ls
+   16  nano agent.py
+   17  python3 agent.py
+   18  nano agent.py
+   19  python3 agent.py
+   20  history
+root@ip-172-31-42-184:/home/ubuntu/ai-troubleshooter#
